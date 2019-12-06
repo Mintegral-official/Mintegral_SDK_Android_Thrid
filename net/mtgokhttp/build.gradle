@@ -37,3 +37,4 @@ dependencies {
 //    implementation 'com.google.code.findbugs:annotations:3.0.1'
 //    implementation 'org.conscrypt:conscrypt-openjdk-uber:2.2.1'
 }
+apply from: '../UploadJcenter.gradle'

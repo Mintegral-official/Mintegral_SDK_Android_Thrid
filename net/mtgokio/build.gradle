@@ -39,3 +39,4 @@ dependencies {
     }
     api 'org.conscrypt:conscrypt-openjdk-uber:2.2.1'
 }
+apply from: '../UploadJcenter.gradle'
