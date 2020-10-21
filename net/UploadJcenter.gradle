@@ -1,12 +1,12 @@
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'com.jfrog.bintray'
 
-version =  "3.12.7"	//aar的版本号
+version =  "3.12.7.1"	//aar的版本号
 
 
 def siteUrl = 'http://cdn-adn.rayjump.com/cdn-adn/v2/markdown_v2/index.html?file=sdk-m_sdk-android&lang=cn' // 项目主页
 def gitUrl = 'https://github.com/Mintegral-official/Mintegral_SDK_Android_Thrid.git' // 项目的git地址
-group = "com.mintegral.msdk.thrid"	// 所在组
+group = "com.mbridge.msdk.thrid"	// 所在组
 install {
     repositories.mavenInstaller {
 // This generates POM.xml with proper parameters
@@ -23,9 +23,9 @@ install {
                 }
                 developers {
                     developer {
-                        id 'mintegral-official'	// 账号
-                        name 'mintegral'	// 名称
-                        email 'hr@mintegral.com' // 邮箱地址
+                        id 'mbridge-official'	// 账号
+                        name 'mbridge'	// 名称
+                        email 'hr@mbridge.com' // 邮箱地址
                     }
                 }
                 scm {
