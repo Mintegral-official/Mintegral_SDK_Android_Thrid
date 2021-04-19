@@ -15,13 +15,11 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-
-import androidx.annotation.Nullable;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okio.ByteString;
 
 /**
- * A non-blocking interface to a web socket. Use the {@linkplain WebSocket.Factory factory} to
+ * A non-blocking interface to a web socket. Use the {@linkplain Factory factory} to
  * create instances; usually this is {@link OkHttpClient}.
  *
  * <h3>Web Socket Lifecycle</h3>

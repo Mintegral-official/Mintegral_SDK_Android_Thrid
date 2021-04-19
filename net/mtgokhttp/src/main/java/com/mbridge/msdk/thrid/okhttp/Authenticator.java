@@ -15,10 +15,8 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
-
+import javax.annotation.Nullable;
 
 /**
  * Performs either <strong>preemptive</strong> authentication before connecting to a proxy server,
@@ -113,6 +111,5 @@ public interface Authenticator {
    * available. It may also not be provided when an authenticator is re-used manually in an
    * application interceptor, such as when implementing client-specific retries.
    */
-  @Nullable
-  Request authenticate(@Nullable Route route, Response response) throws IOException;
+  @Nullable Request authenticate(@Nullable Route route, Response response) throws IOException;
 }

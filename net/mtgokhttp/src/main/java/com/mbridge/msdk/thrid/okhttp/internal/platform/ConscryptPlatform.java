@@ -15,11 +15,11 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal.platform;
 
-import androidx.annotation.Nullable;
-
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.Provider;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -40,8 +40,7 @@ public class ConscryptPlatform extends Platform {
     return Conscrypt.newProviderBuilder().provideTrustManager().build();
   }
 
-  @Override public @Nullable
-  X509TrustManager trustManager(SSLSocketFactory sslSocketFactory) {
+  @Override public @Nullable X509TrustManager trustManager(SSLSocketFactory sslSocketFactory) {
     if (!Conscrypt.isConscrypt(sslSocketFactory)) {
       return super.trustManager(sslSocketFactory);
     }
@@ -63,7 +62,7 @@ public class ConscryptPlatform extends Platform {
   }
 
   @Override public void configureTlsExtensions(
-      SSLSocket sslSocket, String hostname, List<Protocol> protocols) {
+      SSLSocket sslSocket, String hostname, List<Protocol> protocols) throws IOException {
     if (Conscrypt.isConscrypt(sslSocket)) {
       // Enable SNI and session tickets.
       if (hostname != null) {

@@ -15,18 +15,19 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okio.Buffer;
 import com.mbridge.msdk.thrid.okio.BufferedSource;
 import com.mbridge.msdk.thrid.okio.ByteString;
+
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.UTF_8;
 
 /**
  * A one-shot stream from the origin server to the client application with the raw bytes of the
@@ -101,8 +102,7 @@ import com.mbridge.msdk.thrid.okio.ByteString;
  */
 public abstract class ResponseBody implements Closeable {
   /** Multiple calls to {@link #charStream()} must return the same instance. */
-  private @Nullable
-  Reader reader;
+  private @Nullable Reader reader;
 
   public abstract @Nullable MediaType contentType();
 
@@ -181,7 +181,7 @@ public abstract class ResponseBody implements Closeable {
 
   private Charset charset() {
     MediaType contentType = contentType();
-    return contentType != null ? contentType.charset(Util.UTF_8) : Util.UTF_8;
+    return contentType != null ? contentType.charset(UTF_8) : UTF_8;
   }
 
   @Override public void close() {
@@ -193,11 +193,11 @@ public abstract class ResponseBody implements Closeable {
    * and lacks a charset, this will use UTF-8.
    */
   public static ResponseBody create(@Nullable MediaType contentType, String content) {
-    Charset charset = Util.UTF_8;
+    Charset charset = UTF_8;
     if (contentType != null) {
       charset = contentType.charset();
       if (charset == null) {
-        charset = Util.UTF_8;
+        charset = UTF_8;
         contentType = MediaType.parse(contentType + "; charset=utf-8");
       }
     }

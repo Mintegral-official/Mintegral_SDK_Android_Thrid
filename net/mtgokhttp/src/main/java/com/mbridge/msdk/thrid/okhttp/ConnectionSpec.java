@@ -15,13 +15,16 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.util.Arrays;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLSocket;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
+
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.concat;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.indexOf;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.intersect;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.nonEmptyIntersection;
 
 /**
  * Specifies configuration for the socket connection that HTTP traffic travels through. For {@code
@@ -110,8 +113,7 @@ public final class ConnectionSpec {
 
   final boolean tls;
   final boolean supportsTlsExtensions;
-  final @Nullable
-  String[] cipherSuites;
+  final @Nullable String[] cipherSuites;
   final @Nullable String[] tlsVersions;
 
   ConnectionSpec(Builder builder) {
@@ -163,19 +165,19 @@ public final class ConnectionSpec {
    */
   private ConnectionSpec supportedSpec(SSLSocket sslSocket, boolean isFallback) {
     String[] cipherSuitesIntersection = cipherSuites != null
-        ? Util.intersect(CipherSuite.ORDER_BY_NAME, sslSocket.getEnabledCipherSuites(), cipherSuites)
+        ? intersect(CipherSuite.ORDER_BY_NAME, sslSocket.getEnabledCipherSuites(), cipherSuites)
         : sslSocket.getEnabledCipherSuites();
     String[] tlsVersionsIntersection = tlsVersions != null
-        ? Util.intersect(Util.NATURAL_ORDER, sslSocket.getEnabledProtocols(), tlsVersions)
+        ? intersect(Util.NATURAL_ORDER, sslSocket.getEnabledProtocols(), tlsVersions)
         : sslSocket.getEnabledProtocols();
 
     // In accordance with https://tools.ietf.org/html/draft-ietf-tls-downgrade-scsv-00
     // the SCSV cipher is added to signal that a protocol fallback has taken place.
     String[] supportedCipherSuites = sslSocket.getSupportedCipherSuites();
-    int indexOfFallbackScsv = Util.indexOf(
+    int indexOfFallbackScsv = indexOf(
         CipherSuite.ORDER_BY_NAME, supportedCipherSuites, "TLS_FALLBACK_SCSV");
     if (isFallback && indexOfFallbackScsv != -1) {
-      cipherSuitesIntersection = Util.concat(
+      cipherSuitesIntersection = concat(
           cipherSuitesIntersection, supportedCipherSuites[indexOfFallbackScsv]);
     }
 
@@ -201,12 +203,12 @@ public final class ConnectionSpec {
       return false;
     }
 
-    if (tlsVersions != null && !Util.nonEmptyIntersection(
+    if (tlsVersions != null && !nonEmptyIntersection(
         Util.NATURAL_ORDER, tlsVersions, socket.getEnabledProtocols())) {
       return false;
     }
 
-    if (cipherSuites != null && !Util.nonEmptyIntersection(
+    if (cipherSuites != null && !nonEmptyIntersection(
         CipherSuite.ORDER_BY_NAME, cipherSuites, socket.getEnabledCipherSuites())) {
       return false;
     }

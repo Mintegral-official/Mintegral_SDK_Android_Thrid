@@ -19,7 +19,6 @@ import com.mbridge.msdk.thrid.okio.Sink;
 
 import java.io.IOException;
 
-
 public interface CacheRequest {
   Sink body() throws IOException;
 

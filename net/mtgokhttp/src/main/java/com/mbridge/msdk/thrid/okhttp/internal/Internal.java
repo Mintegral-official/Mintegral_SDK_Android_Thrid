@@ -15,10 +15,9 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.net.Socket;
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLSocket;
 import com.mbridge.msdk.thrid.okhttp.Address;
 import com.mbridge.msdk.thrid.okhttp.Call;
@@ -54,7 +53,7 @@ public abstract class Internal {
   public abstract void setCache(OkHttpClient.Builder builder, InternalCache internalCache);
 
   public abstract RealConnection get(ConnectionPool pool, Address address,
-                                     StreamAllocation streamAllocation, Route route);
+      StreamAllocation streamAllocation, Route route);
 
   public abstract boolean equalsNonHost(Address a, Address b);
 

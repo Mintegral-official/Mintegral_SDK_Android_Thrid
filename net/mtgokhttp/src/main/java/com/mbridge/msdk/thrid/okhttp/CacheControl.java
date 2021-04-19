@@ -1,8 +1,7 @@
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.http.HttpHeaders;
 
 /**
@@ -41,8 +40,7 @@ public final class CacheControl {
   private final boolean noTransform;
   private final boolean immutable;
 
-  @Nullable
-  String headerValue; // Lazily computed, null if absent.
+  @Nullable String headerValue; // Lazily computed, null if absent.
 
   private CacheControl(boolean noCache, boolean noStore, int maxAgeSeconds, int sMaxAgeSeconds,
       boolean isPrivate, boolean isPublic, boolean mustRevalidate, int maxStaleSeconds,

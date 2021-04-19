@@ -17,7 +17,8 @@ package com.mbridge.msdk.thrid.okhttp;
 
 import java.nio.charset.Charset;
 import com.mbridge.msdk.thrid.okio.ByteString;
-import com.mbridge.msdk.thrid.okhttp.internal.Util;
+
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.ISO_8859_1;
 
 /** Factory for HTTP authorization credentials. */
 public final class Credentials {
@@ -26,7 +27,7 @@ public final class Credentials {
 
   /** Returns an auth credential for the Basic scheme. */
   public static String basic(String username, String password) {
-    return basic(username, password, Util.ISO_8859_1);
+    return basic(username, password, ISO_8859_1);
   }
 
   public static String basic(String username, String password, Charset charset) {

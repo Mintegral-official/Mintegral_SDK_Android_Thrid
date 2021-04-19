@@ -15,14 +15,12 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal.platform;
 
-import androidx.annotation.Nullable;
-
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLSocket;
 import com.mbridge.msdk.thrid.okhttp.Protocol;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
@@ -69,13 +67,12 @@ class JdkWithJettyBootPlatform extends Platform {
     }
   }
 
-  @Override public @Nullable
-  String getSelectedProtocol(SSLSocket socket) {
+  @Override public @Nullable String getSelectedProtocol(SSLSocket socket) {
     try {
       JettyNegoProvider provider =
           (JettyNegoProvider) Proxy.getInvocationHandler(getMethod.invoke(null, socket));
       if (!provider.unsupported && provider.selected == null) {
-        get().log(INFO, "ALPN callback dropped: HTTP/2 is disabled. "
+        Platform.get().log(INFO, "ALPN callback dropped: HTTP/2 is disabled. "
             + "Is alpn-boot on the boot class path?", null);
         return null;
       }

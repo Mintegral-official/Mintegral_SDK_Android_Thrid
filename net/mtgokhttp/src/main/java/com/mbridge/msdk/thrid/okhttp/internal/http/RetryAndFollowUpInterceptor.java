@@ -51,6 +51,8 @@ import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import static java.net.HttpURLConnection.HTTP_UNAVAILABLE;
 import static com.mbridge.msdk.thrid.okhttp.internal.Util.closeQuietly;
+import static com.mbridge.msdk.thrid.okhttp.internal.http.StatusLine.HTTP_PERM_REDIRECT;
+import static com.mbridge.msdk.thrid.okhttp.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 
 /**
  * This interceptor recovers from failures and follows redirects as necessary. It may throw an
@@ -293,8 +295,8 @@ public final class RetryAndFollowUpInterceptor implements Interceptor {
       case HTTP_UNAUTHORIZED:
         return client.authenticator().authenticate(route, userResponse);
 
-      case StatusLine.HTTP_PERM_REDIRECT:
-      case StatusLine.HTTP_TEMP_REDIRECT:
+      case HTTP_PERM_REDIRECT:
+      case HTTP_TEMP_REDIRECT:
         // "If the 307 or 308 status code is received in response to a request other than GET
         // or HEAD, the user agent MUST NOT automatically redirect the request"
         if (!method.equals("GET") && !method.equals("HEAD")) {

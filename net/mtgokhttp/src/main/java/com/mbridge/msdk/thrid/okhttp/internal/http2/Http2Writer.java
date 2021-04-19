@@ -24,6 +24,23 @@ import com.mbridge.msdk.thrid.okio.BufferedSink;
 
 import static java.util.logging.Level.FINE;
 import static com.mbridge.msdk.thrid.okhttp.internal.Util.format;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.CONNECTION_PREFACE;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.FLAG_ACK;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.FLAG_END_HEADERS;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.FLAG_END_STREAM;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.FLAG_NONE;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.INITIAL_MAX_FRAME_SIZE;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_CONTINUATION;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_DATA;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_GOAWAY;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_HEADERS;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_PING;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_PUSH_PROMISE;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_RST_STREAM;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_SETTINGS;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.TYPE_WINDOW_UPDATE;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.frameLog;
+import static com.mbridge.msdk.thrid.okhttp.internal.http2.Http2.illegalArgument;
 
 /** Writes HTTP/2 transport frames. */
 final class Http2Writer implements Closeable {
@@ -42,16 +59,16 @@ final class Http2Writer implements Closeable {
     this.client = client;
     this.hpackBuffer = new Buffer();
     this.hpackWriter = new Hpack.Writer(hpackBuffer);
-    this.maxFrameSize = Http2.INITIAL_MAX_FRAME_SIZE;
+    this.maxFrameSize = INITIAL_MAX_FRAME_SIZE;
   }
 
   public synchronized void connectionPreface() throws IOException {
     if (closed) throw new IOException("closed");
     if (!client) return; // Nothing to write; servers don't send connection headers!
     if (logger.isLoggable(FINE)) {
-      logger.fine(format(">> CONNECTION %s", Http2.CONNECTION_PREFACE.hex()));
+      logger.fine(format(">> CONNECTION %s", CONNECTION_PREFACE.hex()));
     }
-    sink.write(Http2.CONNECTION_PREFACE.toByteArray());
+    sink.write(CONNECTION_PREFACE.toByteArray());
     sink.flush();
   }
 
@@ -63,8 +80,8 @@ final class Http2Writer implements Closeable {
       hpackWriter.setHeaderTableSizeSetting(peerSettings.getHeaderTableSize());
     }
     int length = 0;
-    byte type = Http2.TYPE_SETTINGS;
-    byte flags = Http2.FLAG_ACK;
+    byte type = TYPE_SETTINGS;
+    byte flags = FLAG_ACK;
     int streamId = 0;
     frameHeader(streamId, length, type, flags);
     sink.flush();
@@ -90,8 +107,8 @@ final class Http2Writer implements Closeable {
 
     long byteCount = hpackBuffer.size();
     int length = (int) Math.min(maxFrameSize - 4, byteCount);
-    byte type = Http2.TYPE_PUSH_PROMISE;
-    byte flags = byteCount == length ? Http2.FLAG_END_HEADERS : 0;
+    byte type = TYPE_PUSH_PROMISE;
+    byte flags = byteCount == length ? FLAG_END_HEADERS : 0;
     frameHeader(streamId, length + 4, type, flags);
     sink.writeInt(promisedStreamId & 0x7fffffff);
     sink.write(hpackBuffer, length);
@@ -128,8 +145,8 @@ final class Http2Writer implements Closeable {
     if (errorCode.httpCode == -1) throw new IllegalArgumentException();
 
     int length = 4;
-    byte type = Http2.TYPE_RST_STREAM;
-    byte flags = Http2.FLAG_NONE;
+    byte type = TYPE_RST_STREAM;
+    byte flags = FLAG_NONE;
     frameHeader(streamId, length, type, flags);
     sink.writeInt(errorCode.httpCode);
     sink.flush();
@@ -151,13 +168,13 @@ final class Http2Writer implements Closeable {
   public synchronized void data(boolean outFinished, int streamId, Buffer source, int byteCount)
       throws IOException {
     if (closed) throw new IOException("closed");
-    byte flags = Http2.FLAG_NONE;
-    if (outFinished) flags |= Http2.FLAG_END_STREAM;
+    byte flags = FLAG_NONE;
+    if (outFinished) flags |= FLAG_END_STREAM;
     dataFrame(streamId, flags, source, byteCount);
   }
 
   void dataFrame(int streamId, byte flags, Buffer buffer, int byteCount) throws IOException {
-    byte type = Http2.TYPE_DATA;
+    byte type = TYPE_DATA;
     frameHeader(streamId, byteCount, type, flags);
     if (byteCount > 0) {
       sink.write(buffer, byteCount);
@@ -168,8 +185,8 @@ final class Http2Writer implements Closeable {
   public synchronized void settings(Settings settings) throws IOException {
     if (closed) throw new IOException("closed");
     int length = settings.size() * 6;
-    byte type = Http2.TYPE_SETTINGS;
-    byte flags = Http2.FLAG_NONE;
+    byte type = TYPE_SETTINGS;
+    byte flags = FLAG_NONE;
     int streamId = 0;
     frameHeader(streamId, length, type, flags);
     for (int i = 0; i < Settings.COUNT; i++) {
@@ -193,8 +210,8 @@ final class Http2Writer implements Closeable {
   public synchronized void ping(boolean ack, int payload1, int payload2) throws IOException {
     if (closed) throw new IOException("closed");
     int length = 8;
-    byte type = Http2.TYPE_PING;
-    byte flags = ack ? Http2.FLAG_ACK : Http2.FLAG_NONE;
+    byte type = TYPE_PING;
+    byte flags = ack ? FLAG_ACK : FLAG_NONE;
     int streamId = 0;
     frameHeader(streamId, length, type, flags);
     sink.writeInt(payload1);
@@ -213,10 +230,10 @@ final class Http2Writer implements Closeable {
   public synchronized void goAway(int lastGoodStreamId, ErrorCode errorCode, byte[] debugData)
       throws IOException {
     if (closed) throw new IOException("closed");
-    if (errorCode.httpCode == -1) throw Http2.illegalArgument("errorCode.httpCode == -1");
+    if (errorCode.httpCode == -1) throw illegalArgument("errorCode.httpCode == -1");
     int length = 8 + debugData.length;
-    byte type = Http2.TYPE_GOAWAY;
-    byte flags = Http2.FLAG_NONE;
+    byte type = TYPE_GOAWAY;
+    byte flags = FLAG_NONE;
     int streamId = 0;
     frameHeader(streamId, length, type, flags);
     sink.writeInt(lastGoodStreamId);
@@ -234,23 +251,23 @@ final class Http2Writer implements Closeable {
   public synchronized void windowUpdate(int streamId, long windowSizeIncrement) throws IOException {
     if (closed) throw new IOException("closed");
     if (windowSizeIncrement == 0 || windowSizeIncrement > 0x7fffffffL) {
-      throw Http2.illegalArgument("windowSizeIncrement == 0 || windowSizeIncrement > 0x7fffffffL: %s",
+      throw illegalArgument("windowSizeIncrement == 0 || windowSizeIncrement > 0x7fffffffL: %s",
           windowSizeIncrement);
     }
     int length = 4;
-    byte type = Http2.TYPE_WINDOW_UPDATE;
-    byte flags = Http2.FLAG_NONE;
+    byte type = TYPE_WINDOW_UPDATE;
+    byte flags = FLAG_NONE;
     frameHeader(streamId, length, type, flags);
     sink.writeInt((int) windowSizeIncrement);
     sink.flush();
   }
 
   public void frameHeader(int streamId, int length, byte type, byte flags) throws IOException {
-    if (logger.isLoggable(FINE)) logger.fine(Http2.frameLog(false, streamId, length, type, flags));
+    if (logger.isLoggable(FINE)) logger.fine(frameLog(false, streamId, length, type, flags));
     if (length > maxFrameSize) {
-      throw Http2.illegalArgument("FRAME_SIZE_ERROR length > %d: %d", maxFrameSize, length);
+      throw illegalArgument("FRAME_SIZE_ERROR length > %d: %d", maxFrameSize, length);
     }
-    if ((streamId & 0x80000000) != 0) throw Http2.illegalArgument("reserved bit set: %s", streamId);
+    if ((streamId & 0x80000000) != 0) throw illegalArgument("reserved bit set: %s", streamId);
     writeMedium(sink, length);
     sink.writeByte(type & 0xff);
     sink.writeByte(flags & 0xff);
@@ -272,7 +289,7 @@ final class Http2Writer implements Closeable {
     while (byteCount > 0) {
       int length = (int) Math.min(maxFrameSize, byteCount);
       byteCount -= length;
-      frameHeader(streamId, length, Http2.TYPE_CONTINUATION, byteCount == 0 ? Http2.FLAG_END_HEADERS : 0);
+      frameHeader(streamId, length, TYPE_CONTINUATION, byteCount == 0 ? FLAG_END_HEADERS : 0);
       sink.write(hpackBuffer, length);
     }
   }
@@ -283,9 +300,9 @@ final class Http2Writer implements Closeable {
 
     long byteCount = hpackBuffer.size();
     int length = (int) Math.min(maxFrameSize, byteCount);
-    byte type = Http2.TYPE_HEADERS;
-    byte flags = byteCount == length ? Http2.FLAG_END_HEADERS : 0;
-    if (outFinished) flags |= Http2.FLAG_END_STREAM;
+    byte type = TYPE_HEADERS;
+    byte flags = byteCount == length ? FLAG_END_HEADERS : 0;
+    if (outFinished) flags |= FLAG_END_STREAM;
     frameHeader(streamId, length, type, flags);
     sink.write(hpackBuffer, length);
 

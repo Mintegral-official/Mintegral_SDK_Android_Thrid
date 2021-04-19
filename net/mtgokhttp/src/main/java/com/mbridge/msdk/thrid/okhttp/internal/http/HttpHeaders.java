@@ -37,6 +37,7 @@ import com.mbridge.msdk.thrid.okio.ByteString;
 import static java.net.HttpURLConnection.HTTP_NOT_MODIFIED;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static com.mbridge.msdk.thrid.okhttp.internal.Util.equal;
+import static com.mbridge.msdk.thrid.okhttp.internal.http.StatusLine.HTTP_CONTINUE;
 
 /** Headers and utilities for internal use by OkHttp. */
 public final class HttpHeaders {
@@ -325,7 +326,7 @@ public final class HttpHeaders {
     }
 
     int responseCode = response.code();
-    if ((responseCode < StatusLine.HTTP_CONTINUE || responseCode >= 200)
+    if ((responseCode < HTTP_CONTINUE || responseCode >= 200)
         && responseCode != HTTP_NO_CONTENT
         && responseCode != HTTP_NOT_MODIFIED) {
       return true;

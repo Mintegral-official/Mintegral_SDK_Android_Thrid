@@ -16,8 +16,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.lang.ref.Reference;
 import java.net.Socket;
 import java.util.ArrayDeque;
@@ -29,7 +27,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okhttp.internal.connection.RealConnection;
 import com.mbridge.msdk.thrid.okhttp.internal.connection.RouteDatabase;
@@ -136,8 +134,7 @@ public final class ConnectionPool {
    * Replaces the connection held by {@code streamAllocation} with a shared connection if possible.
    * This recovers when multiple multiplexed connections are created concurrently.
    */
-  @Nullable
-  Socket deduplicate(Address address, StreamAllocation streamAllocation) {
+  @Nullable Socket deduplicate(Address address, StreamAllocation streamAllocation) {
     assert (Thread.holdsLock(this));
     for (RealConnection connection : connections) {
       if (connection.isEligible(address, null)
@@ -188,7 +185,7 @@ public final class ConnectionPool {
     }
 
     for (RealConnection connection : evictedConnections) {
-      Util.closeQuietly(connection.socket());
+      closeQuietly(connection.socket());
     }
   }
 
@@ -244,7 +241,7 @@ public final class ConnectionPool {
       }
     }
 
-    Util.closeQuietly(longestIdleConnection.socket());
+    closeQuietly(longestIdleConnection.socket());
 
     // Cleanup again immediately.
     return 0;

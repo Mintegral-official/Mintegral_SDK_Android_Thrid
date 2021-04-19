@@ -16,14 +16,12 @@
 package com.mbridge.msdk.thrid.okhttp.internal.cache;
 
 import java.io.IOException;
-
-import com.mbridge.msdk.thrid.okhttp.Cache;
 import com.mbridge.msdk.thrid.okhttp.Request;
 import com.mbridge.msdk.thrid.okhttp.Response;
 
 /**
  * OkHttp's internal cache interface. Applications shouldn't implement this: instead use {@link
- * Cache}.
+ * okhttp3.Cache}.
  */
 public interface InternalCache {
   Response get(Request request) throws IOException;

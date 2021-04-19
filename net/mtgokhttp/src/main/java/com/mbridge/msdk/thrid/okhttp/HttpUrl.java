@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -28,11 +26,16 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okhttp.internal.publicsuffix.PublicSuffixDatabase;
 import com.mbridge.msdk.thrid.okio.Buffer;
 
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.decodeHexDigit;
 import static com.mbridge.msdk.thrid.okhttp.internal.Util.delimiterOffset;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.skipLeadingAsciiWhitespace;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.skipTrailingAsciiWhitespace;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.verifyAsIpAddress;
 
 /**
  * A uniform resource locator (URL) with a scheme of either {@code http} or {@code https}. Use this
@@ -324,8 +327,7 @@ public final class HttpUrl {
    * non-empty, but never null. Values are null if the name has no corresponding '=' separator, or
    * empty, or non-empty.
    */
-  private final @Nullable
-  List<String> queryNamesAndValues;
+  private final @Nullable List<String> queryNamesAndValues;
 
   /** Decoded fragment. */
   private final @Nullable String fragment;
@@ -409,7 +411,7 @@ public final class HttpUrl {
   public String encodedUsername() {
     if (username.isEmpty()) return "";
     int usernameStart = scheme.length() + 3; // "://".length() == 3.
-    int usernameEnd = Util.delimiterOffset(url, usernameStart, url.length(), ":@");
+    int usernameEnd = delimiterOffset(url, usernameStart, url.length(), ":@");
     return url.substring(usernameStart, usernameEnd);
   }
 
@@ -542,7 +544,7 @@ public final class HttpUrl {
    */
   public String encodedPath() {
     int pathStart = url.indexOf('/', scheme.length() + 3); // "://".length() == 3.
-    int pathEnd = Util.delimiterOffset(url, pathStart, url.length(), "?#");
+    int pathEnd = delimiterOffset(url, pathStart, url.length(), "?#");
     return url.substring(pathStart, pathEnd);
   }
 
@@ -566,11 +568,11 @@ public final class HttpUrl {
    */
   public List<String> encodedPathSegments() {
     int pathStart = url.indexOf('/', scheme.length() + 3);
-    int pathEnd = Util.delimiterOffset(url, pathStart, url.length(), "?#");
+    int pathEnd = delimiterOffset(url, pathStart, url.length(), "?#");
     List<String> result = new ArrayList<>();
     for (int i = pathStart; i < pathEnd; ) {
       i++; // Skip the '/'.
-      int segmentEnd = Util.delimiterOffset(url, i, pathEnd, '/');
+      int segmentEnd = delimiterOffset(url, i, pathEnd, '/');
       result.add(url.substring(i, segmentEnd));
       i = segmentEnd;
     }
@@ -610,7 +612,7 @@ public final class HttpUrl {
   public @Nullable String encodedQuery() {
     if (queryNamesAndValues == null) return null; // No query.
     int queryStart = url.indexOf('?') + 1;
-    int queryEnd = Util.delimiterOffset(url, queryStart, url.length(), '#');
+    int queryEnd = delimiterOffset(url, queryStart, url.length(), '#');
     return url.substring(queryStart, queryEnd);
   }
 
@@ -958,7 +960,7 @@ public final class HttpUrl {
    * </table>
    */
   public @Nullable String topPrivateDomain() {
-    if (Util.verifyAsIpAddress(host)) return null;
+    if (verifyAsIpAddress(host)) return null;
     return PublicSuffixDatabase.get().getEffectiveTldPlusOne(host);
   }
 
@@ -1075,7 +1077,7 @@ public final class HttpUrl {
     private Builder addPathSegments(String pathSegments, boolean alreadyEncoded) {
       int offset = 0;
       do {
-        int segmentEnd = Util.delimiterOffset(pathSegments, offset, pathSegments.length(), "/\\");
+        int segmentEnd = delimiterOffset(pathSegments, offset, pathSegments.length(), "/\\");
         boolean addTrailingSlash = segmentEnd < pathSegments.length();
         push(pathSegments, offset, segmentEnd, addTrailingSlash, alreadyEncoded);
         offset = segmentEnd + 1;
@@ -1309,8 +1311,8 @@ public final class HttpUrl {
     static final String INVALID_HOST = "Invalid URL host";
 
     Builder parse(@Nullable HttpUrl base, String input) {
-      int pos = Util.skipLeadingAsciiWhitespace(input, 0, input.length());
-      int limit = Util.skipTrailingAsciiWhitespace(input, pos, input.length());
+      int pos = skipLeadingAsciiWhitespace(input, 0, input.length());
+      int limit = skipTrailingAsciiWhitespace(input, pos, input.length());
 
       // Scheme.
       int schemeDelimiterOffset = schemeDelimiterOffset(input, pos, limit);
@@ -1349,7 +1351,7 @@ public final class HttpUrl {
         pos += slashCount;
         authority:
         while (true) {
-          int componentDelimiterOffset = Util.delimiterOffset(input, pos, limit, "@/\\?#");
+          int componentDelimiterOffset = delimiterOffset(input, pos, limit, "@/\\?#");
           int c = componentDelimiterOffset != limit
               ? input.charAt(componentDelimiterOffset)
               : -1;
@@ -1357,7 +1359,7 @@ public final class HttpUrl {
             case '@':
               // User info precedes.
               if (!hasPassword) {
-                int passwordColonOffset = Util.delimiterOffset(
+                int passwordColonOffset = delimiterOffset(
                     input, pos, componentDelimiterOffset, ':');
                 String canonicalUsername = canonicalize(
                     input, pos, passwordColonOffset, USERNAME_ENCODE_SET, true, false, false, true,
@@ -1420,13 +1422,13 @@ public final class HttpUrl {
       }
 
       // Resolve the relative path.
-      int pathDelimiterOffset = Util.delimiterOffset(input, pos, limit, "?#");
+      int pathDelimiterOffset = delimiterOffset(input, pos, limit, "?#");
       resolvePath(input, pos, pathDelimiterOffset);
       pos = pathDelimiterOffset;
 
       // Query.
       if (pos < limit && input.charAt(pos) == '?') {
-        int queryDelimiterOffset = Util.delimiterOffset(input, pos, limit, '#');
+        int queryDelimiterOffset = delimiterOffset(input, pos, limit, '#');
         this.encodedQueryNamesAndValues = queryStringToNamesAndValues(canonicalize(
             input, pos + 1, queryDelimiterOffset, QUERY_ENCODE_SET, true, false, true, true, null));
         pos = queryDelimiterOffset;
@@ -1460,7 +1462,7 @@ public final class HttpUrl {
 
       // Read path segments.
       for (int i = pos; i < limit; ) {
-        int pathSegmentDelimiterOffset = Util.delimiterOffset(input, i, limit, "/\\");
+        int pathSegmentDelimiterOffset = delimiterOffset(input, i, limit, "/\\");
         boolean segmentHasTrailingSlash = pathSegmentDelimiterOffset < limit;
         push(input, i, pathSegmentDelimiterOffset, segmentHasTrailingSlash, true);
         i = pathSegmentDelimiterOffset;
@@ -1638,8 +1640,8 @@ public final class HttpUrl {
     for (int i = pos; i < limit; i += Character.charCount(codePoint)) {
       codePoint = encoded.codePointAt(i);
       if (codePoint == '%' && i + 2 < limit) {
-        int d1 = Util.decodeHexDigit(encoded.charAt(i + 1));
-        int d2 = Util.decodeHexDigit(encoded.charAt(i + 2));
+        int d1 = decodeHexDigit(encoded.charAt(i + 1));
+        int d2 = decodeHexDigit(encoded.charAt(i + 2));
         if (d1 != -1 && d2 != -1) {
           out.writeByte((d1 << 4) + d2);
           i += 2;
@@ -1656,8 +1658,8 @@ public final class HttpUrl {
   static boolean percentEncoded(String encoded, int pos, int limit) {
     return pos + 2 < limit
         && encoded.charAt(pos) == '%'
-        && Util.decodeHexDigit(encoded.charAt(pos + 1)) != -1
-        && Util.decodeHexDigit(encoded.charAt(pos + 2)) != -1;
+        && decodeHexDigit(encoded.charAt(pos + 1)) != -1
+        && decodeHexDigit(encoded.charAt(pos + 2)) != -1;
   }
 
   /**
@@ -1703,8 +1705,8 @@ public final class HttpUrl {
   }
 
   static void canonicalize(Buffer out, String input, int pos, int limit, String encodeSet,
-                           boolean alreadyEncoded, boolean strict, boolean plusIsSpace, boolean asciiOnly,
-                           Charset charset) {
+      boolean alreadyEncoded, boolean strict, boolean plusIsSpace, boolean asciiOnly,
+      Charset charset) {
     Buffer encodedCharBuffer = null; // Lazily allocated.
     int codePoint;
     for (int i = pos; i < limit; i += Character.charCount(codePoint)) {

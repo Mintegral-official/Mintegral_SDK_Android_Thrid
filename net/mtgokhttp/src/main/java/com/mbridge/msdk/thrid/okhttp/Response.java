@@ -15,17 +15,14 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.http.HttpHeaders;
 import com.mbridge.msdk.thrid.okio.Buffer;
 import com.mbridge.msdk.thrid.okio.BufferedSource;
-import com.mbridge.msdk.thrid.okhttp.internal.http.StatusLine;
 
 import static java.net.HttpURLConnection.HTTP_MOVED_PERM;
 import static java.net.HttpURLConnection.HTTP_MOVED_TEMP;
@@ -33,6 +30,8 @@ import static java.net.HttpURLConnection.HTTP_MULT_CHOICE;
 import static java.net.HttpURLConnection.HTTP_PROXY_AUTH;
 import static java.net.HttpURLConnection.HTTP_SEE_OTHER;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
+import static com.mbridge.msdk.thrid.okhttp.internal.http.StatusLine.HTTP_PERM_REDIRECT;
+import static com.mbridge.msdk.thrid.okhttp.internal.http.StatusLine.HTTP_TEMP_REDIRECT;
 
 /**
  * An HTTP response. Instances of this class are not immutable: the response body is a one-shot
@@ -46,8 +45,7 @@ public final class Response implements Closeable {
   final Protocol protocol;
   final int code;
   final String message;
-  final @Nullable
-  Handshake handshake;
+  final @Nullable Handshake handshake;
   final Headers headers;
   final @Nullable ResponseBody body;
   final @Nullable Response networkResponse;
@@ -186,8 +184,8 @@ public final class Response implements Closeable {
   /** Returns true if this response redirects to another resource. */
   public boolean isRedirect() {
     switch (code) {
-      case StatusLine.HTTP_PERM_REDIRECT:
-      case StatusLine.HTTP_TEMP_REDIRECT:
+      case HTTP_PERM_REDIRECT:
+      case HTTP_TEMP_REDIRECT:
       case HTTP_MULT_CHOICE:
       case HTTP_MOVED_PERM:
       case HTTP_MOVED_TEMP:

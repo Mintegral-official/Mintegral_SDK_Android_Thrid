@@ -17,8 +17,6 @@
 
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -29,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okhttp.internal.http.HttpDate;
 
@@ -60,8 +59,7 @@ public final class Headers {
   }
 
   /** Returns the last value corresponding to the specified field, or null. */
-  public @Nullable
-  String get(String name) {
+  public @Nullable String get(String name) {
     return get(namesAndValues, name);
   }
 

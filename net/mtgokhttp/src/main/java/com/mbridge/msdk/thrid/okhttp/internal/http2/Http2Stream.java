@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal.http2;
 
-import androidx.annotation.Nullable;
-
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -25,7 +23,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.Headers;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okio.AsyncTimeout;
@@ -667,6 +665,7 @@ public final class Http2Stream {
   class StreamTimeout extends AsyncTimeout {
     @Override protected void timedOut() {
       closeLater(ErrorCode.CANCEL);
+      connection.sendDegradedPingLater();
     }
 
     @Override protected IOException newTimeoutException(IOException cause) {

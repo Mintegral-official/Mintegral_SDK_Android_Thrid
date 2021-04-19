@@ -15,14 +15,12 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
-
+import javax.annotation.Nullable;
 
 /**
  * Listener for metrics events. Extend this class to monitor the quantity, size, and duration of
@@ -55,8 +53,8 @@ public abstract class EventListener {
   public static final EventListener NONE = new EventListener() {
   };
 
-  static EventListener.Factory factory(final EventListener listener) {
-    return new EventListener.Factory() {
+  static Factory factory(final EventListener listener) {
+    return new Factory() {
       public EventListener create(Call call) {
         return listener;
       }
@@ -149,7 +147,7 @@ public abstract class EventListener {
    * Proxy)}.
    */
   public void connectFailed(Call call, InetSocketAddress inetSocketAddress, Proxy proxy,
-                            @Nullable Protocol protocol, IOException ioe) {
+      @Nullable Protocol protocol, IOException ioe) {
   }
 
   /**

@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.net.Proxy;
 import java.net.ProxySelector;
@@ -29,6 +27,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nullable;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLContext;
@@ -50,6 +49,8 @@ import com.mbridge.msdk.thrid.okhttp.internal.ws.RealWebSocket;
 import com.mbridge.msdk.thrid.okio.Sink;
 import com.mbridge.msdk.thrid.okio.Source;
 
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.assertionError;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.checkDuration;
 
 /**
  * Factory for {@linkplain Call calls}, which can be used to send HTTP requests and read their
@@ -138,7 +139,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
         builder.addLenient(name, value);
       }
 
-      @Override public void setCache(OkHttpClient.Builder builder, InternalCache internalCache) {
+      @Override public void setCache(Builder builder, InternalCache internalCache) {
         builder.setInternalCache(internalCache);
       }
 
@@ -148,7 +149,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
       }
 
       @Override public RealConnection get(ConnectionPool pool, Address address,
-                                          StreamAllocation streamAllocation, Route route) {
+          StreamAllocation streamAllocation, Route route) {
         return pool.get(address, streamAllocation, route);
       }
 
@@ -205,8 +206,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
   final EventListener.Factory eventListenerFactory;
   final ProxySelector proxySelector;
   final CookieJar cookieJar;
-  final @Nullable
-  Cache cache;
+  final @Nullable Cache cache;
   final @Nullable InternalCache internalCache;
   final SocketFactory socketFactory;
   final SSLSocketFactory sslSocketFactory;
@@ -292,7 +292,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
       sslContext.init(null, new TrustManager[] { trustManager }, null);
       return sslContext.getSocketFactory();
     } catch (GeneralSecurityException e) {
-      throw Util.assertionError("No System TLS", e); // The system has no TLS. Just give up.
+      throw assertionError("No System TLS", e); // The system has no TLS. Just give up.
     }
   }
 
@@ -536,7 +536,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * retries all must complete within one timeout period.
      */
     public Builder callTimeout(long timeout, TimeUnit unit) {
-      callTimeout = Util.checkDuration("timeout", timeout, unit);
+      callTimeout = checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -550,7 +550,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      */
 
     public Builder callTimeout(Duration duration) {
-      callTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      callTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -563,7 +563,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * The default value is 10 seconds.
      */
     public Builder connectTimeout(long timeout, TimeUnit unit) {
-      connectTimeout = Util.checkDuration("timeout", timeout, unit);
+      connectTimeout = checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -576,7 +576,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * The default value is 10 seconds.
      */
     public Builder connectTimeout(Duration duration) {
-      connectTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      connectTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -591,7 +591,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * @see Source#timeout()
      */
     public Builder readTimeout(long timeout, TimeUnit unit) {
-      readTimeout = Util.checkDuration("timeout", timeout, unit);
+      readTimeout = checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -606,7 +606,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * @see Source#timeout()
      */
     public Builder readTimeout(Duration duration) {
-      readTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      readTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -620,7 +620,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * @see Sink#timeout()
      */
     public Builder writeTimeout(long timeout, TimeUnit unit) {
-      writeTimeout = Util.checkDuration("timeout", timeout, unit);
+      writeTimeout = checkDuration("timeout", timeout, unit);
       return this;
     }
 
@@ -634,7 +634,7 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * @see Sink#timeout()
      */
     public Builder writeTimeout(Duration duration) {
-      writeTimeout = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      writeTimeout = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 
@@ -647,12 +647,12 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * client will assume that connectivity has been lost. When this happens on a web socket the
      * connection is canceled and its listener is {@linkplain WebSocketListener#onFailure notified
      * of the failure}. When it happens on an HTTP/2 connection the connection is closed and any
-     * calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
+     * calls it is carrying {@linkplain IOException will fail with an IOException}.
      *
      * <p>The default value of 0 disables client-initiated pings.
      */
     public Builder pingInterval(long interval, TimeUnit unit) {
-      pingInterval = Util.checkDuration("interval", interval, unit);
+      pingInterval = checkDuration("interval", interval, unit);
       return this;
     }
 
@@ -665,12 +665,12 @@ public class OkHttpClient implements Cloneable, Call.Factory, WebSocket.Factory 
      * client will assume that connectivity has been lost. When this happens on a web socket the
      * connection is canceled and its listener is {@linkplain WebSocketListener#onFailure notified
      * of the failure}. When it happens on an HTTP/2 connection the connection is closed and any
-     * calls it is carrying {@linkplain java.io.IOException will fail with an IOException}.
+     * calls it is carrying {@linkplain IOException will fail with an IOException}.
      *
      * <p>The default value of 0 disables client-initiated pings.
      */
     public Builder pingInterval(Duration duration) {
-      pingInterval = Util.checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
+      pingInterval = checkDuration("timeout", duration.toMillis(), TimeUnit.MILLISECONDS);
       return this;
     }
 

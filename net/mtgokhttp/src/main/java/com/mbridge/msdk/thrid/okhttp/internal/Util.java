@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal;
 
-import androidx.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -42,7 +40,7 @@ import java.util.TimeZone;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Pattern;
-
+import javax.annotation.Nullable;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
@@ -160,6 +158,11 @@ public final class Util {
       } catch (AssertionError e) {
         if (!isAndroidGetsocknameError(e)) throw e;
       } catch (RuntimeException rethrown) {
+        if ("bio == null".equals(rethrown.getMessage())) {
+          // Conscrypt in Android 10 and 11 may throw closing an SSLSocket. This is safe to ignore.
+          // https://issuetracker.google.com/issues/177450597
+          return;
+        }
         throw rethrown;
       } catch (Exception ignored) {
       }
@@ -520,8 +523,7 @@ public final class Util {
   }
 
   /** Decodes an IPv6 address like 1111:2222:3333:4444:5555:6666:7777:8888 or ::1. */
-  private static @Nullable
-  InetAddress decodeIpv6(String input, int pos, int limit) {
+  private static @Nullable InetAddress decodeIpv6(String input, int pos, int limit) {
     byte[] address = new byte[16];
     int b = 0;
     int compress = -1;

@@ -15,12 +15,10 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okio.BufferedSink;
 import com.mbridge.msdk.thrid.okio.ByteString;
@@ -29,8 +27,7 @@ import com.mbridge.msdk.thrid.okio.Source;
 
 public abstract class RequestBody {
   /** Returns the Content-Type header for this body. */
-  public abstract @Nullable
-  MediaType contentType();
+  public abstract @Nullable MediaType contentType();
 
   /**
    * Returns the number of bytes that will be written to {@code sink} in a call to {@link #writeTo},

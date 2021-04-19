@@ -15,9 +15,7 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal.http;
 
-
-import androidx.annotation.Nullable;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.MediaType;
 import com.mbridge.msdk.thrid.okhttp.ResponseBody;
 import com.mbridge.msdk.thrid.okio.BufferedSource;
@@ -27,8 +25,7 @@ public final class RealResponseBody extends ResponseBody {
    * Use a string to avoid parsing the content type until needed. This also defers problems caused
    * by malformed content types.
    */
-  private final @Nullable
-  String contentTypeString;
+  private final @Nullable String contentTypeString;
   private final long contentLength;
   private final BufferedSource source;
 

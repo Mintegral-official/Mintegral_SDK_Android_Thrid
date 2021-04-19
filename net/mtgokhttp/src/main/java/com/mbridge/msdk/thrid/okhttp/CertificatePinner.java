@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
@@ -25,11 +23,12 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import com.mbridge.msdk.thrid.okhttp.internal.tls.CertificateChainCleaner;
 import com.mbridge.msdk.thrid.okio.ByteString;
-import com.mbridge.msdk.thrid.okhttp.internal.Util;
+
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.equal;
 
 /**
  * Constrains which certificates are trusted. Pinning certificates defends against attacks on
@@ -75,10 +74,10 @@ import com.mbridge.msdk.thrid.okhttp.internal.Util;
  *     sha256/lCppFqbkrlJ3EcVFAkeip0+44VaoJUymbnOaEUk7tEU=: CN=AddTrust External CA Root
  *   Pinned certificates for publicobject.com:
  *     sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
- *   at CertificatePinner.check(CertificatePinner.java)
- *   at Connection.upgradeToTls(Connection.java)
- *   at Connection.connect(Connection.java)
- *   at Connection.connectAndSetOwner(Connection.java)
+ *   at okhttp3.CertificatePinner.check(CertificatePinner.java)
+ *   at okhttp3.Connection.upgradeToTls(Connection.java)
+ *   at okhttp3.Connection.connect(Connection.java)
+ *   at okhttp3.Connection.connectAndSetOwner(Connection.java)
  * }</pre>
  *
  * Follow up by pasting the public key hashes from the exception into the
@@ -130,8 +129,7 @@ public final class CertificatePinner {
   public static final CertificatePinner DEFAULT = new Builder().build();
 
   private final Set<Pin> pins;
-  private final @Nullable
-  CertificateChainCleaner certificateChainCleaner;
+  private final @Nullable CertificateChainCleaner certificateChainCleaner;
 
   CertificatePinner(Set<Pin> pins, @Nullable CertificateChainCleaner certificateChainCleaner) {
     this.pins = pins;
@@ -141,7 +139,7 @@ public final class CertificatePinner {
   @Override public boolean equals(@Nullable Object other) {
     if (other == this) return true;
     return other instanceof CertificatePinner
-        && (Util.equal(certificateChainCleaner, ((CertificatePinner) other).certificateChainCleaner)
+        && (equal(certificateChainCleaner, ((CertificatePinner) other).certificateChainCleaner)
         && pins.equals(((CertificatePinner) other).pins));
   }
 
@@ -230,7 +228,7 @@ public final class CertificatePinner {
   /** Returns a certificate pinner that uses {@code certificateChainCleaner}. */
   CertificatePinner withCertificateChainCleaner(
       @Nullable CertificateChainCleaner certificateChainCleaner) {
-    return Util.equal(this.certificateChainCleaner, certificateChainCleaner)
+    return equal(this.certificateChainCleaner, certificateChainCleaner)
         ? this
         : new CertificatePinner(pins, certificateChainCleaner);
   }

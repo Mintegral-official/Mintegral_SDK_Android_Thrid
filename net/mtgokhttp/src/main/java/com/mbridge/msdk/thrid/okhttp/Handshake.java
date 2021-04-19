@@ -15,15 +15,13 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.security.Principal;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Collections;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSession;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
@@ -107,8 +105,7 @@ public final class Handshake {
   }
 
   /** Returns the remote peer's principle, or null if that peer is anonymous. */
-  public @Nullable
-  Principal peerPrincipal() {
+  public @Nullable Principal peerPrincipal() {
     return !peerCertificates.isEmpty()
         ? ((X509Certificate) peerCertificates.get(0)).getSubjectX500Principal()
         : null;

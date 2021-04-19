@@ -15,13 +15,11 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.nio.charset.Charset;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import javax.annotation.Nullable;
 
 /**
  * An <a href="http://tools.ietf.org/html/rfc2045">RFC 2045</a> Media Type, appropriate to describe
@@ -37,8 +35,7 @@ public final class MediaType {
   private final String mediaType;
   private final String type;
   private final String subtype;
-  private final @Nullable
-  String charset;
+  private final @Nullable String charset;
 
   private MediaType(String mediaType, String type, String subtype, @Nullable String charset) {
     this.mediaType = mediaType;

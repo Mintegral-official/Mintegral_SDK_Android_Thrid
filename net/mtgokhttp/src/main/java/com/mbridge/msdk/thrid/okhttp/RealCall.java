@@ -15,15 +15,13 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.NamedRunnable;
 import com.mbridge.msdk.thrid.okhttp.internal.cache.CacheInterceptor;
 import com.mbridge.msdk.thrid.okhttp.internal.connection.ConnectInterceptor;
@@ -35,10 +33,10 @@ import com.mbridge.msdk.thrid.okhttp.internal.http.RetryAndFollowUpInterceptor;
 import com.mbridge.msdk.thrid.okhttp.internal.platform.Platform;
 import com.mbridge.msdk.thrid.okio.AsyncTimeout;
 import com.mbridge.msdk.thrid.okio.Timeout;
-import com.mbridge.msdk.thrid.okhttp.internal.Util;
 
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static com.mbridge.msdk.thrid.okhttp.internal.Util.closeQuietly;
+import static com.mbridge.msdk.thrid.okhttp.internal.platform.Platform.INFO;
 
 final class RealCall implements Call {
   final OkHttpClient client;
@@ -104,8 +102,7 @@ final class RealCall implements Call {
     }
   }
 
-  @Nullable
-  IOException timeoutExit(@Nullable IOException cause) {
+  @Nullable IOException timeoutExit(@Nullable IOException cause) {
     if (!timeout.exit()) return cause;
 
     InterruptedIOException e = new InterruptedIOException("timeout");
@@ -208,7 +205,7 @@ final class RealCall implements Call {
         e = timeoutExit(e);
         if (signalledCallback) {
           // Do not signal the callback twice!
-          Platform.get().log(Platform.INFO, "Callback failure for " + toLoggableString(), e);
+          Platform.get().log(INFO, "Callback failure for " + toLoggableString(), e);
         } else {
           eventListener.callFailed(RealCall.this, e);
           responseCallback.onFailure(RealCall.this, e);
@@ -259,7 +256,7 @@ final class RealCall implements Call {
 
     Response response = chain.proceed(originalRequest);
     if (retryAndFollowUpInterceptor.isCanceled()) {
-      Util.closeQuietly(response);
+      closeQuietly(response);
       throw new IOException("Canceled");
     }
     return response;

@@ -15,16 +15,16 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import javax.net.SocketFactory;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
+
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.equal;
 
 /**
  * A specification for a connection to an origin server. For simple connections, this is the
@@ -43,8 +43,7 @@ public final class Address {
   final List<Protocol> protocols;
   final List<ConnectionSpec> connectionSpecs;
   final ProxySelector proxySelector;
-  final @Nullable
-  Proxy proxy;
+  final @Nullable Proxy proxy;
   final @Nullable SSLSocketFactory sslSocketFactory;
   final @Nullable HostnameVerifier hostnameVerifier;
   final @Nullable CertificatePinner certificatePinner;
@@ -179,10 +178,10 @@ public final class Address {
         && this.protocols.equals(that.protocols)
         && this.connectionSpecs.equals(that.connectionSpecs)
         && this.proxySelector.equals(that.proxySelector)
-        && Util.equal(this.proxy, that.proxy)
-        && Util.equal(this.sslSocketFactory, that.sslSocketFactory)
-        && Util.equal(this.hostnameVerifier, that.hostnameVerifier)
-        && Util.equal(this.certificatePinner, that.certificatePinner)
+        && equal(this.proxy, that.proxy)
+        && equal(this.sslSocketFactory, that.sslSocketFactory)
+        && equal(this.hostnameVerifier, that.hostnameVerifier)
+        && equal(this.certificatePinner, that.certificatePinner)
         && this.url().port() == that.url().port();
   }
 

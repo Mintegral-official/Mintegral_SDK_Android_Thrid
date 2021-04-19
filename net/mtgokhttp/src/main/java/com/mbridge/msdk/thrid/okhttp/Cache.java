@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.File;
 import java.io.Flushable;
@@ -30,6 +28,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okhttp.internal.cache.CacheRequest;
 import com.mbridge.msdk.thrid.okhttp.internal.cache.CacheStrategy;
@@ -222,8 +221,7 @@ public final class Cache implements Closeable, Flushable {
     return response;
   }
 
-  @Nullable
-  CacheRequest put(Response response) {
+  @Nullable CacheRequest put(Response response) {
     String requestMethod = response.request().method();
 
     if (HttpMethod.invalidatesCache(response.request().method())) {

@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,7 +25,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.RealCall.AsyncCall;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 
@@ -41,8 +39,7 @@ import com.mbridge.msdk.thrid.okhttp.internal.Util;
 public final class Dispatcher {
   private int maxRequests = 64;
   private int maxRequestsPerHost = 5;
-  private @Nullable
-  Runnable idleCallback;
+  private @Nullable Runnable idleCallback;
 
   /** Executes calls. Created lazily. */
   private @Nullable ExecutorService executorService;

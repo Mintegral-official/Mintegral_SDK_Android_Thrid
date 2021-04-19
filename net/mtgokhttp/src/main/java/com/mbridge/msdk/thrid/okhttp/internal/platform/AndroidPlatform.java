@@ -17,9 +17,6 @@ package com.mbridge.msdk.thrid.okhttp.internal.platform;
 
 import android.os.Build;
 import android.util.Log;
-
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -32,7 +29,7 @@ import java.security.cert.Certificate;
 import java.security.cert.TrustAnchor;
 import java.security.cert.X509Certificate;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLPeerUnverifiedException;
 import javax.net.ssl.SSLSocket;
@@ -96,8 +93,7 @@ class AndroidPlatform extends Platform {
     }
   }
 
-  @Override protected @Nullable
-  X509TrustManager trustManager(SSLSocketFactory sslSocketFactory) {
+  @Override protected @Nullable X509TrustManager trustManager(SSLSocketFactory sslSocketFactory) {
     Object context = readFieldOrNull(sslSocketFactory, sslParametersClass, "sslParameters");
     if (context == null) {
       // If that didn't work, try the Google Play Services SSL provider before giving up. This
@@ -120,7 +116,7 @@ class AndroidPlatform extends Platform {
   }
 
   @Override public void configureTlsExtensions(
-      SSLSocket sslSocket, String hostname, List<Protocol> protocols) {
+      SSLSocket sslSocket, String hostname, List<Protocol> protocols) throws IOException {
     // Enable SNI and session tickets.
     if (hostname != null) {
       setUseSessionTickets.invokeOptionalWithoutCheckedException(sslSocket, true);
@@ -241,6 +237,10 @@ class AndroidPlatform extends Platform {
   }
 
   public static Platform buildIfSupported() {
+    if (!Platform.isAndroid()) {
+      return null;
+    }
+
     // Attempt to find Android 2.3+ APIs.
     try {
       Class<?> sslParametersClass;
@@ -395,7 +395,7 @@ class AndroidPlatform extends Platform {
    *
    * <p>This class uses APIs added to Android in API 14 (Android 4.0, released October 2011). This
    * class shouldn't be used in Android API 17 or better because those releases are better served by
-   * {@link AndroidPlatform.AndroidCertificateChainCleaner}.
+   * {@link AndroidCertificateChainCleaner}.
    */
   static final class AndroidTrustRootIndex implements TrustRootIndex {
     private final X509TrustManager trustManager;
@@ -461,6 +461,15 @@ class AndroidPlatform extends Platform {
       return SSLContext.getInstance("TLS");
     } catch (NoSuchAlgorithmException e) {
       throw new IllegalStateException("No TLS provider", e);
+    }
+  }
+
+  static int getSdkInt() {
+    try {
+      return Build.VERSION.SDK_INT;
+    } catch (NoClassDefFoundError ignored) {
+      // fails fatally against robolectric classes
+      return 0;
     }
   }
 }

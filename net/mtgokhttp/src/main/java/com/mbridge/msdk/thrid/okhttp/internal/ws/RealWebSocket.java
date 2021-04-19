@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal.ws;
 
-import androidx.annotation.Nullable;
-
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -29,7 +27,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.Call;
 import com.mbridge.msdk.thrid.okhttp.Callback;
 import com.mbridge.msdk.thrid.okhttp.EventListener;

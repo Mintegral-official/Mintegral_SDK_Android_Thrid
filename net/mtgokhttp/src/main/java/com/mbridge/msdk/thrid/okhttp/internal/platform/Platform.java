@@ -16,8 +16,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp.internal.platform;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.InetSocketAddress;
@@ -28,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
+import javax.annotation.Nullable;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
@@ -91,8 +89,7 @@ public class Platform {
     return "OkHttp";
   }
 
-  protected @Nullable
-  X509TrustManager trustManager(SSLSocketFactory sslSocketFactory) {
+  protected @Nullable X509TrustManager trustManager(SSLSocketFactory sslSocketFactory) {
     // Attempt to get the trust manager from an OpenJDK socket factory. We attempt this on all
     // platforms in order to support Robolectric, which mixes classes from both Android and the
     // Oracle JDK. Note that we don't support HTTP/2 or other nice features on Robolectric.
@@ -112,7 +109,7 @@ public class Platform {
    * @param hostname non-null for client-side handshakes; null for server-side handshakes.
    */
   public void configureTlsExtensions(SSLSocket sslSocket, @Nullable String hostname,
-      List<Protocol> protocols) {
+      List<Protocol> protocols) throws IOException {
   }
 
   /**
@@ -201,12 +198,20 @@ public class Platform {
 
   /** Attempt to match the host runtime to a capable Platform implementation. */
   private static Platform findPlatform() {
-    Platform android = AndroidPlatform.buildIfSupported();
-
-    if (android != null) {
-      return android;
+    if (isAndroid()) {
+      return findAndroidPlatform();
+    } else {
+      return findJvmPlatform();
     }
+  }
 
+  public static boolean isAndroid() {
+    // This explicit check avoids activating in Android Studio with Android specific classes
+    // available when running plugins inside the IDE.
+    return "Dalvik".equals(System.getProperty("java.vm.name"));
+  }
+
+  private static Platform findJvmPlatform() {
     if (isConscryptPreferred()) {
       Platform conscrypt = ConscryptPlatform.buildIfSupported();
 
@@ -229,6 +234,22 @@ public class Platform {
 
     // Probably an Oracle JDK like OpenJDK.
     return new Platform();
+  }
+
+  private static Platform findAndroidPlatform() {
+    Platform android10 = Android10Platform.buildIfSupported();
+
+    if (android10 != null) {
+      return android10;
+    }
+
+    Platform android = AndroidPlatform.buildIfSupported();
+
+    if (android == null) {
+      throw new NullPointerException("No platform found on Android");
+    }
+
+    return android;
   }
 
   /**

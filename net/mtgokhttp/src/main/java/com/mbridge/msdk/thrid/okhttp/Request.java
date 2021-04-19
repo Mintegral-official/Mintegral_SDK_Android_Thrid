@@ -15,14 +15,12 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.net.URL;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okhttp.internal.http.HttpMethod;
 
@@ -34,8 +32,7 @@ public final class Request {
   final HttpUrl url;
   final String method;
   final Headers headers;
-  final @Nullable
-  RequestBody body;
+  final @Nullable RequestBody body;
   final Map<Class<?>, Object> tags;
 
   private volatile @Nullable CacheControl cacheControl; // Lazily initialized.

@@ -15,17 +15,16 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okio.Buffer;
 import com.mbridge.msdk.thrid.okio.BufferedSink;
 
+import static com.mbridge.msdk.thrid.okhttp.HttpUrl.FORM_ENCODE_SET;
 import static com.mbridge.msdk.thrid.okhttp.HttpUrl.percentDecode;
 
 public final class FormBody extends RequestBody {
@@ -49,7 +48,7 @@ public final class FormBody extends RequestBody {
   }
 
   public String name(int index) {
-    return HttpUrl.percentDecode(encodedName(index), true);
+    return percentDecode(encodedName(index), true);
   }
 
   public String encodedValue(int index) {
@@ -57,7 +56,7 @@ public final class FormBody extends RequestBody {
   }
 
   public String value(int index) {
-    return HttpUrl.percentDecode(encodedValue(index), true);
+    return percentDecode(encodedValue(index), true);
   }
 
   @Override public MediaType contentType() {
@@ -120,8 +119,8 @@ public final class FormBody extends RequestBody {
       if (name == null) throw new NullPointerException("name == null");
       if (value == null) throw new NullPointerException("value == null");
 
-      names.add(HttpUrl.canonicalize(name, HttpUrl.FORM_ENCODE_SET, false, false, true, true, charset));
-      values.add(HttpUrl.canonicalize(value, HttpUrl.FORM_ENCODE_SET, false, false, true, true, charset));
+      names.add(HttpUrl.canonicalize(name, FORM_ENCODE_SET, false, false, true, true, charset));
+      values.add(HttpUrl.canonicalize(value, FORM_ENCODE_SET, false, false, true, true, charset));
       return this;
     }
 
@@ -129,8 +128,8 @@ public final class FormBody extends RequestBody {
       if (name == null) throw new NullPointerException("name == null");
       if (value == null) throw new NullPointerException("value == null");
 
-      names.add(HttpUrl.canonicalize(name, HttpUrl.FORM_ENCODE_SET, true, false, true, true, charset));
-      values.add(HttpUrl.canonicalize(value, HttpUrl.FORM_ENCODE_SET, true, false, true, true, charset));
+      names.add(HttpUrl.canonicalize(name, FORM_ENCODE_SET, true, false, true, true, charset));
+      values.add(HttpUrl.canonicalize(value, FORM_ENCODE_SET, true, false, true, true, charset));
       return this;
     }
 

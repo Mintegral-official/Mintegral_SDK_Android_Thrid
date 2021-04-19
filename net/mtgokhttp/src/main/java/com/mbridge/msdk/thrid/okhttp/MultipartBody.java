@@ -15,13 +15,11 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okio.Buffer;
 import com.mbridge.msdk.thrid.okio.BufferedSink;
@@ -123,7 +121,7 @@ public final class MultipartBody extends RequestBody {
    * length-in-digits of an encoded integer.
    */
   private long writeOrCountBytes(
-          @Nullable BufferedSink sink, boolean countBytes) throws IOException {
+      @Nullable BufferedSink sink, boolean countBytes) throws IOException {
     long byteCount = 0L;
 
     Buffer byteCountBuffer = null;

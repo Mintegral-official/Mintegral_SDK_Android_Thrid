@@ -15,8 +15,6 @@
  */
 package com.mbridge.msdk.thrid.okhttp;
 
-import androidx.annotation.Nullable;
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -26,12 +24,17 @@ import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+import javax.annotation.Nullable;
 import com.mbridge.msdk.thrid.okhttp.internal.Util;
 import com.mbridge.msdk.thrid.okhttp.internal.http.HttpDate;
 import com.mbridge.msdk.thrid.okhttp.internal.publicsuffix.PublicSuffixDatabase;
 
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.UTC;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.canonicalizeHost;
 import static com.mbridge.msdk.thrid.okhttp.internal.Util.delimiterOffset;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.indexOfControlOrNonAscii;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.trimSubstring;
+import static com.mbridge.msdk.thrid.okhttp.internal.Util.verifyAsIpAddress;
 
 /**
  * An <a href="http://tools.ietf.org/html/rfc6265">RFC 6265</a> Cookie.
@@ -186,7 +189,7 @@ public final class Cookie {
 
     if (urlHost.endsWith(domain)
         && urlHost.charAt(urlHost.length() - domain.length() - 1) == '.'
-        && !Util.verifyAsIpAddress(urlHost)) {
+        && !verifyAsIpAddress(urlHost)) {
       return true; // As in 'example.com' matching 'www.example.com'.
     }
 
@@ -212,24 +215,23 @@ public final class Cookie {
    * Attempt to parse a {@code Set-Cookie} HTTP header value {@code setCookie} as a cookie. Returns
    * null if {@code setCookie} is not a well-formed cookie.
    */
-  public static @Nullable
-  Cookie parse(HttpUrl url, String setCookie) {
+  public static @Nullable Cookie parse(HttpUrl url, String setCookie) {
     return parse(System.currentTimeMillis(), url, setCookie);
   }
 
   static @Nullable Cookie parse(long currentTimeMillis, HttpUrl url, String setCookie) {
     int pos = 0;
     int limit = setCookie.length();
-    int cookiePairEnd = Util.delimiterOffset(setCookie, pos, limit, ';');
+    int cookiePairEnd = delimiterOffset(setCookie, pos, limit, ';');
 
-    int pairEqualsSign = Util.delimiterOffset(setCookie, pos, cookiePairEnd, '=');
+    int pairEqualsSign = delimiterOffset(setCookie, pos, cookiePairEnd, '=');
     if (pairEqualsSign == cookiePairEnd) return null;
 
-    String cookieName = Util.trimSubstring(setCookie, pos, pairEqualsSign);
-    if (cookieName.isEmpty() || Util.indexOfControlOrNonAscii(cookieName) != -1) return null;
+    String cookieName = trimSubstring(setCookie, pos, pairEqualsSign);
+    if (cookieName.isEmpty() || indexOfControlOrNonAscii(cookieName) != -1) return null;
 
-    String cookieValue = Util.trimSubstring(setCookie, pairEqualsSign + 1, cookiePairEnd);
-    if (Util.indexOfControlOrNonAscii(cookieValue) != -1) return null;
+    String cookieValue = trimSubstring(setCookie, pairEqualsSign + 1, cookiePairEnd);
+    if (indexOfControlOrNonAscii(cookieValue) != -1) return null;
 
     long expiresAt = HttpDate.MAX_DATE;
     long deltaSeconds = -1L;
@@ -242,12 +244,12 @@ public final class Cookie {
 
     pos = cookiePairEnd + 1;
     while (pos < limit) {
-      int attributePairEnd = Util.delimiterOffset(setCookie, pos, limit, ';');
+      int attributePairEnd = delimiterOffset(setCookie, pos, limit, ';');
 
-      int attributeEqualsSign = Util.delimiterOffset(setCookie, pos, attributePairEnd, '=');
-      String attributeName = Util.trimSubstring(setCookie, pos, attributeEqualsSign);
+      int attributeEqualsSign = delimiterOffset(setCookie, pos, attributePairEnd, '=');
+      String attributeName = trimSubstring(setCookie, pos, attributeEqualsSign);
       String attributeValue = attributeEqualsSign < attributePairEnd
-          ? Util.trimSubstring(setCookie, attributeEqualsSign + 1, attributePairEnd)
+          ? trimSubstring(setCookie, attributeEqualsSign + 1, attributePairEnd)
           : "";
 
       if (attributeName.equalsIgnoreCase("expires")) {
@@ -367,7 +369,7 @@ public final class Cookie {
     if (minute < 0 || minute > 59) throw new IllegalArgumentException();
     if (second < 0 || second > 59) throw new IllegalArgumentException();
 
-    Calendar calendar = new GregorianCalendar(Util.UTC);
+    Calendar calendar = new GregorianCalendar(UTC);
     calendar.setLenient(false);
     calendar.set(Calendar.YEAR, year);
     calendar.set(Calendar.MONTH, month - 1);
@@ -427,7 +429,7 @@ public final class Cookie {
     if (s.startsWith(".")) {
       s = s.substring(1);
     }
-    String canonicalDomain = Util.canonicalizeHost(s);
+    String canonicalDomain = canonicalizeHost(s);
     if (canonicalDomain == null) {
       throw new IllegalArgumentException();
     }
